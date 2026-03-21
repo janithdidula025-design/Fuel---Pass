@@ -6,76 +6,86 @@
     
     <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FuelPass Pro">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
-    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v20","name":"Fuel Pass Max Pro","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v30","name":"Fuel Pass Pro","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
 
-    <title>Fuel Pass Max Pro</title>
+    <title>Fuel Pass </title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;600&display=swap');
-        :root { --gold: #FFD700; --accent: #00F2FF; --red: #ff4444; --glass: rgba(255, 255, 255, 0.05); }
+        :root { --gold: #FFD700; --red: #ff4444; --glass: rgba(255, 255, 255, 0.05); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             margin: 0; padding: 0; background: #000; font-family: 'Poppins', sans-serif; color: white;
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+            padding-top: env(safe-area-inset-top);
         }
 
-        body::before {
-            content: ""; position: fixed; inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, #000 100%), 
-                        url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000') center/cover;
-            z-index: -1; filter: blur(15px);
+        /* Header with Update Button */
+        .header { 
+            padding: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo-area { display: flex; flex-direction: column; }
+        .logo-text { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--gold); letter-spacing: 1px; margin: 0; }
+        .version-text { font-size: 0.6rem; opacity: 0.4; }
+
+        .btn-update {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--gold); letter-spacing: 2px; margin: 0; }
-        .v-label { font-size: 0.6rem; opacity: 0.5; border: 1px solid rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 5px; }
+        /* Rest of the UI */
+        .tabs { display: flex; gap: 10px; padding: 10px 15px; }
+        .tab-btn { flex: 1; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background: var(--gold); color: black; border: none; }
 
-        .tabs { display: flex; gap: 10px; padding: 5px 15px; height: 50px; }
-        .tab-btn { flex: 1; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-        .tab-btn.active { background: var(--gold); color: black; border: none; box-shadow: 0 4px 15px rgba(255,215,0,0.3); }
-
-        .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .view { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 15px; }
         .view.active { display: flex; }
 
-        .home-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 10px; }
-        .v-no-main { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 0 10px rgba(0,242,255,0.3); }
-
-        .qr-art-frame {
-            background: #FFFFFF; width: 85vw; height: 85vw; max-width: 380px; max-height: 380px;
+        .qr-frame {
+            background: #fff; width: 82vw; height: 82vw; max-width: 350px; max-height: 350px;
             border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px rgba(255,215,0,0.1);
         }
         #mainQr { width: 100%; height: 100%; object-fit: contain; }
 
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 92vw; }
-        .stat-card { background: rgba(0,0,0,0.7); padding: 12px 5px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+        .stat-box { background: rgba(255,255,255,0.03); padding: 15px 5px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .s-val { color: var(--gold); font-size: 1.1rem; font-weight: 700; display: block; }
         .s-lbl { font-size: 0.55rem; opacity: 0.5; text-transform: uppercase; }
 
-        #vList { flex: 1; overflow-y: auto; padding: 15px; }
-        .manage-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.03); }
-        .btn-del { background: rgba(255,68,68,0.1); border: 1px solid var(--red); color: var(--red); padding: 8px 12px; border-radius: 10px; font-size: 10px; font-weight: bold; }
+        #vList { width: 100%; overflow-y: auto; padding: 10px; }
+        .v-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-        .bottom-actions { padding: 20px; }
-        .btn-add { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 18px; font-weight: 900; width: 100%; font-family: 'Orbitron'; cursor: pointer; }
+        .btn-main { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 15px; font-weight: 900; width: 90%; font-family: 'Orbitron'; cursor: pointer; margin-bottom: 20px; }
 
-        #formOverlay { display: none; position: fixed; inset: 0; background: #000; z-index: 2000; padding: 25px; flex-direction: column; justify-content: center; }
-        input, select { width: 100%; padding: 16px; border-radius: 12px; background: #111; border: 1px solid #333; color: white; margin-bottom: 12px; font-size: 1rem; }
+        #overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; padding: 25px; flex-direction: column; justify-content: center; }
+        input, select { width: 100%; padding: 15px; border-radius: 12px; background: #111; border: 1px solid #333; color: white; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <p class="logo-text">FUEL PASS PRO</p>
-        <span class="v-label">SYSTEM V20</span>
+        <div class="logo-area">
+            <p class="logo-text">FUEL PASS PRO</p>
+            <span class="version-text">Version 3.0</span>
+        </div>
+        <button class="btn-update" onclick="checkUpdate()">CHECK UPDATE</button>
     </div>
 
     <div class="tabs">
@@ -84,54 +94,53 @@
     </div>
 
     <div id="home" class="view active">
-        <div class="home-content">
-            <p class="v-no-main" id="dispV">NO VEHICLE</p>
-            <div class="qr-art-frame">
-                <img id="mainQr" src="" style="display:none;">
-                <p id="noQrText" style="color:#000; font-weight:bold; text-align:center;">UPLOAD QR TO START</p>
-            </div>
-            <div class="stats-row">
-                <div class="stat-card"><span class="s-val" id="dispQ">0L</span><span class="s-lbl">Quota</span></div>
-                <div class="stat-card"><span class="s-val" id="dispU" style="color:var(--red)">0L</span><span class="s-lbl">Used</span></div>
-                <div class="stat-card"><span class="s-val" id="dispR" style="color:#00ff88">0L</span><span class="s-lbl">Balance</span></div>
-            </div>
+        <h2 id="dispV" style="margin:0; font-family:'Orbitron'; color:#fff;">NO VEHICLE</h2>
+        <div class="qr-frame">
+            <img id="mainQr" src="" style="display:none;">
+            <p id="noQrText" style="color:#000; font-weight:bold; text-align:center;">UPLOAD QR TO START</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box"><span class="s-val" id="dispQ">0L</span><span class="s-lbl">Quota</span></div>
+            <div class="stat-box"><span class="s-val" id="dispU" style="color:var(--red)">0L</span><span class="s-lbl">Used</span></div>
+            <div class="stat-box"><span class="s-val" id="dispR" style="color:#00ff88">0L</span><span class="s-lbl">Balance</span></div>
         </div>
     </div>
 
     <div id="manage" class="view">
         <div id="vList"></div>
-        <div class="bottom-actions"><button class="btn-add" onclick="openForm()">+ ADD VEHICLE</button></div>
+        <button class="btn-main" onclick="openForm()">+ ADD VEHICLE</button>
     </div>
 
-    <div id="formOverlay">
-        <h2 style="font-family:'Orbitron'; color:var(--gold); text-align:center; margin-bottom:30px;">VEHICLE SETUP</h2>
-        <select id="inT">
-            <option>🚗 Car</option><option>🏍️ Bike</option><option>🛺 Tuk Tuk</option><option>🚐 Van</option><option>🚛 Truck</option>
-        </select>
-        <input type="text" id="inV" placeholder="Vehicle No (Ex: CAB-1234)">
-        <input type="number" id="inQ" placeholder="Weekly Quota (L)">
-        <input type="number" id="inU" placeholder="Current Used (L)">
-        <label style="font-size: 0.7rem; color: #888; margin-bottom: 5px; display: block;">Select QR Photo</label>
+    <div id="overlay">
+        <h2 style="color:var(--gold); text-align:center; font-family:'Orbitron';">SETTINGS</h2>
+        <select id="inT"><option>🚗 Car</option><option>🏍️ Bike</option><option>🛺 Tuk</option><option>🚐 Van</option></select>
+        <input type="text" id="inV" placeholder="Vehicle No">
+        <input type="number" id="inQ" placeholder="Quota (L)">
+        <input type="number" id="inU" placeholder="Used (L)">
         <input type="file" id="inF" accept="image/*">
-        <button class="btn-add" onclick="saveData()" style="margin-top:20px;">SAVE DATA</button>
-        <p onclick="hideForm()" style="color:var(--red); text-align:center; margin-top:25px; cursor:pointer; font-weight:bold;">CANCEL</p>
+        <button class="btn-main" onclick="saveData()">SAVE DATA</button>
+        <p onclick="hideForm()" style="text-align:center; color:var(--red); cursor:pointer; font-weight:bold; margin-top:20px;">CANCEL</p>
     </div>
 
     <script>
-        // === CRITICAL: SERVICE WORKER FOR INSTALLATION ===
+        // Check Update Function
+        function checkUpdate() {
+            if (confirm("අලුත් Update එකක් තිබේදැයි පරීක්ෂා කර බලමුද?")) {
+                // Browser cache එක clear කරලා අලුතින් load කරනවා
+                window.location.reload(true);
+            }
+        }
+
+        // Service Worker for Installation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-                `;
+                const swCode = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
                 const blob = new Blob([swCode], {type: 'text/javascript'});
                 navigator.serviceWorker.register(URL.createObjectURL(blob));
             });
         }
 
-        let vehicles = JSON.parse(localStorage.getItem('fuel_v20')) || [];
+        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v3')) || [];
         let activeIdx = 0;
 
         function switchTab(id, btn) {
@@ -160,15 +169,15 @@
             const list = document.getElementById('vList');
             list.innerHTML = '';
             vehicles.forEach((v, i) => {
-                list.innerHTML += `<div class="manage-card">
-                    <div><b>${v.no}</b><br><small style="opacity:0.4">${v.type}</small></div>
-                    <button class="btn-del" onclick="del(${i})">DELETE</button>
+                list.innerHTML += `<div class="v-card">
+                    <div><b>${v.no}</b><br><small style="opacity:0.5">${v.type}</small></div>
+                    <button onclick="del(${i})" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-size:0.7rem;">DEL</button>
                 </div>`;
             });
         }
 
-        function openForm() { document.getElementById('formOverlay').style.display = 'flex'; }
-        function hideForm() { document.getElementById('formOverlay').style.display = 'none'; }
+        function openForm() { document.getElementById('overlay').style.display = 'flex'; }
+        function hideForm() { document.getElementById('overlay').style.display = 'none'; }
 
         function saveData() {
             const no = document.getElementById('inV').value.toUpperCase();
@@ -177,18 +186,18 @@
             const type = document.getElementById('inT').value;
             const f = document.getElementById('inF').files[0];
 
-            if(!no || !q || !f) return alert("Please fill all fields and select QR!");
+            if(!no || !q || !f) return alert("කරුණාකර සියලු විස්තර පුරවන්න!");
 
             const reader = new FileReader();
             reader.onload = e => {
                 vehicles.push({no, q, u, type, qr: e.target.result});
-                localStorage.setItem('fuel_v20', JSON.stringify(vehicles));
+                localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
                 hideForm(); renderHome(); switchTab('home', document.getElementById('btnH'));
             };
             reader.readAsDataURL(f);
         }
 
-        function del(i) { if(confirm("Delete this?")) { vehicles.splice(i,1); localStorage.setItem('fuel_v20', JSON.stringify(vehicles)); renderManage(); } }
+        function del(i) { if(confirm("මෙම වාහනය මකමුද?")) { vehicles.splice(i,1); localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles)); renderManage(); } }
         
         window.onload = renderHome;
     </script>
