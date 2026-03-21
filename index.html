@@ -3,20 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Fuel Pass">
+    <meta name="apple-mobile-web-app-title" content="FuelPass Pro">
 
-    <link rel="manifest" href='data:application/json,{"name":"Fuel Pass Max Pro","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+    <link rel="manifest" href='data:application/json,{"id":"fuelpass-pro-v14","name":"Fuel Pass Max Pro","short_name":"FuelPass","start_url":"index.html?v=14","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
-    <title>Fuel Pass Max Pro</title>
+    <title>Fuel Pass Max Pro v14</title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;600&display=swap');
-        :root { --gold: #FFD700; --accent: #00F2FF; --glass: rgba(255, 255, 255, 0.05); }
+        
+        :root { 
+            --gold: #FFD700; 
+            --accent: #00F2FF; 
+            --red: #ff4444; 
+            --glass: rgba(255, 255, 255, 0.05); 
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
@@ -29,48 +37,58 @@
             content: ""; position: fixed; inset: 0;
             background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, #000 100%), 
                         url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000') center/cover;
-            z-index: -1; filter: blur(10px);
+            z-index: -1; filter: blur(15px);
         }
 
-        /* UI Elements - Auto Responding to Display */
+        /* Top Header */
         .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; margin: 0; opacity: 0.7; }
-        .upd-badge { font-size: 0.6rem; background: rgba(255,215,0,0.1); color: var(--gold); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,215,0,0.3); cursor: pointer; }
+        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; margin: 0; }
+        .upd-badge { font-size: 0.6rem; background: rgba(255,215,0,0.1); color: var(--gold); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--gold); cursor: pointer; }
 
+        /* Navigation Tabs */
         .tabs { display: flex; gap: 10px; padding: 5px 15px; height: 50px; }
-        .tab-btn { flex: 1; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .tab-btn { flex: 1; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .tab-btn.active { background: var(--gold); color: black; border: none; box-shadow: 0 4px 15px rgba(255,215,0,0.3); }
 
+        /* Vehicle Chip Selector */
         .v-selector { display: flex; overflow-x: auto; padding: 10px 15px; gap: 8px; scrollbar-width: none; }
-        .v-selector::-webkit-scrollbar { display: none; }
         .v-chip { padding: 8px 15px; background: rgba(255,255,255,0.05); border-radius: 20px; font-size: 0.7rem; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
         .v-chip.selected { border-color: var(--accent); color: var(--accent); background: rgba(0, 242, 255, 0.1); }
 
+        /* Views */
         .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
         .view.active { display: flex; }
 
+        /* Main Display */
         .home-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 10px; }
-        .v-no-main { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff; margin: 0; text-align: center; }
+        .v-no-main { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 0 10px rgba(0,242,255,0.5); }
 
-        /* QR Frame - Edge to Edge Auto Scaling */
+        /* QR Frame */
         .qr-art-frame {
             background: #FFFFFF; width: 88vw; height: 88vw; max-width: 400px; max-height: 400px;
-            border-radius: 25px; padding: 8px; display: flex; align-items: center; justify-content: center;
-            border: 10px solid #FFFFFF; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         }
         #mainQr { width: 100%; height: 100%; object-fit: contain; }
 
+        /* Statistics */
         .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 92vw; max-width: 420px; }
-        .stat-card { background: rgba(0,0,0,0.7); padding: 12px 5px; border-radius: 18px; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
+        .stat-card { background: rgba(0,0,0,0.8); padding: 15px 5px; border-radius: 18px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .s-val { color: var(--gold); font-size: 1.2rem; font-weight: 700; display: block; }
         .s-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; }
 
+        /* Garage List */
         #vList { flex: 1; overflow-y: auto; padding: 15px; }
-        .manage-card { background: rgba(255,255,255,0.04); padding: 15px; border-radius: 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .manage-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.03); }
         
+        .btn-edit { background: none; border: 1px solid #555; color: white; padding: 8px 15px; border-radius: 10px; font-size: 11px; }
+        .btn-delete { background: rgba(255,68,68,0.1); border: 1px solid var(--red); color: var(--red); padding: 8px 15px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        
+        /* Buttons */
         .bottom-actions { padding: 15px; }
         .btn-save { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 18px; font-weight: 900; width: 100%; font-family: 'Orbitron'; cursor: pointer; }
 
+        /* Settings Overlay */
         #formOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; padding: 25px; flex-direction: column; backdrop-filter: blur(25px); overflow-y: auto; }
         input, select { width: 100%; padding: 16px; border-radius: 15px; background: rgba(255,255,255,0.1); border: 1px solid #333; color: white; margin-bottom: 12px; font-size: 1rem; }
     </style>
@@ -93,7 +111,7 @@
             <p class="v-no-main" id="dispV">NO VEHICLE</p>
             <div class="qr-art-frame">
                 <img id="mainQr" src="" style="display:none;">
-                <p id="noQrText" style="color:#222; font-weight:bold;">SCAN QR IMAGE</p>
+                <p id="noQrText" style="color:#222; font-weight:bold;">UPLOAD FUEL PASS QR</p>
             </div>
             <div class="stats-row">
                 <div class="stat-card"><span class="s-val" id="dispQ">0L</span><span class="s-lbl">Quota</span></div>
@@ -114,44 +132,46 @@
         <h2 style="font-family:'Orbitron'; color:var(--gold); text-align:center;">SETTINGS</h2>
         <input type="hidden" id="editIdx" value="-1">
         <select id="inT">
-            <option value="🚗">Car</option><option value="🏍️">Motorbike</option><option value="🚐">Van</option><option value="🛺">Tuk Tuk</option><option value="🚛">Truck</option>
+            <option value="🚗">Car</option>
+            <option value="🏍️">Motorbike</option>
+            <option value="🚐">Van</option>
+            <option value="🛺">Tuk Tuk</option>
+            <option value="🚛">Truck</option>
         </select>
-        <input type="text" id="inV" placeholder="Vehicle No">
+        <input type="text" id="inV" placeholder="Vehicle No (Ex: WP AAA-0000)">
         <input type="number" id="inQ" placeholder="Weekly Quota (L)">
         <input type="number" id="inU" placeholder="Current Used (L)">
-        <label style="font-size: 0.7rem; color: #888; margin-bottom: 5px; display: block;">Upload Fuel Pass QR Image</label>
+        <label style="font-size: 0.7rem; color: #888; margin-bottom: 5px; display: block;">Upload QR Image</label>
         <input type="file" id="inF" accept="image/*">
         <button class="btn-save" onclick="saveData()">SAVE CHANGES</button>
-        <p onclick="hideForm()" style="color:#ff4444; text-align:center; margin-top:25px; cursor:pointer; font-weight: bold;">CANCEL</p>
+        <p onclick="hideForm()" style="color:#ff4444; text-align:center; margin-top:25px; cursor:pointer; font-weight:bold;">CANCEL</p>
     </div>
 
     <script>
-        // ශක්තිමත් Service Worker එකක් - මේක තමයි App එක Shortcut එකක් වෙන්න දෙන්නේ නැත්තේ
+        // Force Install Logic
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const cacheName = 'fuelpass-v9';
                     self.addEventListener('install', e => self.skipWaiting());
                     self.addEventListener('activate', e => e.waitUntil(clients.claim()));
                     self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
                 `;
                 const blob = new Blob([swCode], {type: 'text/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).then(reg => {
-                    console.log('App Service Registered');
-                });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
             });
         }
 
         function forceUpdate() {
-            if(confirm("අලුත් අප්ඩේට් එකක් පරීක්ෂා කරමුද? ඔබේ දත්ත මැකෙන්නේ නැත.")) {
+            if(confirm("අලුත් Update එකක් බලමුද? ඔබේ දත්ත මැකෙන්නේ නැත.")) {
                 window.location.reload(true);
             }
         }
 
-        let vehicles = JSON.parse(localStorage.getItem('f_v_v9')) || [];
-        let activeIdx = parseInt(localStorage.getItem('f_v_idx9')) || 0;
+        // නව දත්ත ගබඩාව (v14)
+        let vehicles = JSON.parse(localStorage.getItem('f_v_v14')) || [];
+        let activeIdx = parseInt(localStorage.getItem('f_v_idx14')) || 0;
 
-        function save() { localStorage.setItem('f_v_v9', JSON.stringify(vehicles)); }
+        function save() { localStorage.setItem('f_v_v14', JSON.stringify(vehicles)); }
 
         function switchTab(id, btn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -164,13 +184,18 @@
         function renderHome() {
             const selector = document.getElementById('topSelector');
             selector.innerHTML = '';
-            if(vehicles.length === 0) return;
+            if(vehicles.length === 0) {
+                document.getElementById('dispV').innerText = "NO DATA";
+                document.getElementById('mainQr').style.display = 'none';
+                document.getElementById('noQrText').style.display = 'block';
+                return;
+            }
 
             vehicles.forEach((v, idx) => {
                 const chip = document.createElement('div');
                 chip.className = `v-chip ${idx === activeIdx ? 'selected' : ''}`;
                 chip.innerHTML = `${v.type} ${v.no}`;
-                chip.onclick = () => { activeIdx = idx; localStorage.setItem('f_v_idx9', idx); renderHome(); };
+                chip.onclick = () => { activeIdx = idx; localStorage.setItem('f_v_idx14', idx); renderHome(); };
                 selector.appendChild(chip);
             });
 
@@ -182,8 +207,14 @@
             document.getElementById('dispR').innerText = (bal < 0 ? 0 : bal) + "L";
 
             const qr = document.getElementById('mainQr');
-            if(v.qr) { qr.src = v.qr; qr.style.display = 'block'; document.getElementById('noQrText').style.display = 'none'; }
-            else { qr.style.display = 'none'; document.getElementById('noQrText').style.display = 'block'; }
+            if(v.qr) { 
+                qr.src = v.qr; 
+                qr.style.display = 'block'; 
+                document.getElementById('noQrText').style.display = 'none'; 
+            } else {
+                qr.style.display = 'none';
+                document.getElementById('noQrText').style.display = 'block';
+            }
         }
 
         function renderManage() {
@@ -192,9 +223,9 @@
             vehicles.forEach((v, idx) => {
                 list.innerHTML += `<div class="manage-card">
                     <div><b>${v.no}</b><br><small style="opacity:0.5">${v.type} | ${v.q}L</small></div>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="openForm(${idx})" style="background:none; border:1px solid #555; color:white; padding:8px 12px; border-radius:10px; font-size:10px;">EDIT</button>
-                        <button onclick="deleteV(${idx})" style="background:none; border:1px solid #ff4444; color:#ff4444; padding:8px 12px; border-radius:10px; font-size:10px;">X</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-edit" onclick="openForm(${idx})">EDIT</button>
+                        <button class="btn-delete" onclick="deleteV(${idx})">🗑️ DELETE</button>
                     </div>
                 </div>`;
             });
@@ -204,12 +235,16 @@
             document.getElementById('formOverlay').style.display = 'flex';
             if(idx > -1) {
                 const v = vehicles[idx];
-                document.getElementById('inV').value = v.no; document.getElementById('inQ').value = v.q;
-                document.getElementById('inU').value = v.u; document.getElementById('inT').value = v.type;
+                document.getElementById('inV').value = v.no; 
+                document.getElementById('inQ').value = v.q;
+                document.getElementById('inU').value = v.u; 
+                document.getElementById('inT').value = v.type;
                 document.getElementById('editIdx').value = idx;
             } else {
                 document.getElementById('editIdx').value = -1;
-                document.getElementById('inV').value = ''; document.getElementById('inQ').value = ''; document.getElementById('inU').value = '0';
+                document.getElementById('inV').value = ''; 
+                document.getElementById('inQ').value = ''; 
+                document.getElementById('inU').value = '0';
             }
         }
 
@@ -222,23 +257,36 @@
             const type = document.getElementById('inT').value;
             const f = document.getElementById('inF').files[0];
             const idx = parseInt(document.getElementById('editIdx').value);
-            if(!no || !q) return alert("Fill details!");
+            
+            if(!no || !q) return alert("කරුණාකර විස්තර සම්පූර්ණ කරන්න!");
 
             let vData = idx > -1 ? vehicles[idx] : { no, q, u, type, qr: '' };
             vData.no = no; vData.q = q; vData.u = u; vData.type = type;
 
             if(f) {
                 const reader = new FileReader();
-                reader.onload = e => { vData.qr = e.target.result; if(idx === -1) vehicles.push(vData); save(); finalize(); };
+                reader.onload = e => { 
+                    vData.qr = e.target.result; 
+                    if(idx === -1) vehicles.push(vData); 
+                    save(); finalize(); 
+                };
                 reader.readAsDataURL(f);
             } else { 
-                if(idx === -1) return alert("Upload QR Image!"); 
+                if(idx === -1) return alert("කරුණාකර QR පින්තූරය තෝරන්න!"); 
                 save(); finalize(); 
             }
         }
 
         function finalize() { hideForm(); renderHome(); switchTab('home', document.getElementById('btnH')); }
-        function deleteV(idx) { if(confirm("මකන්නද?")) { vehicles.splice(idx,1); save(); renderManage(); } }
+        
+        function deleteV(idx) { 
+            if(confirm("මෙම වාහනය ඉවත් කිරීමට අවශ්‍යද?")) { 
+                vehicles.splice(idx,1); 
+                save(); 
+                renderManage(); 
+            } 
+        }
+
         window.onload = renderHome;
     </script>
 </body>
