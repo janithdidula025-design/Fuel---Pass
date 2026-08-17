@@ -199,10 +199,22 @@
     </div>
 
     <script>
-        // Car & Bike default array (GitHub Link replace කරන්න)
+        // GitHub එකේ Direct Raw Links එකතු කර ඇති default vehicles
         const defaultVehicles = [
-            { no: "CAD-1234", type: "🚗 Car", q: 20, u: 5, qr: "car_qr.png" },
-            { no: "BIKE-5678", type: "🏍️ Bike", q: 7, u: 2, qr: "bike_qr.png" }
+            { 
+                no: "BGW-0898", 
+                type: "🚗 Car", 
+                q: 20, 
+                u: 0, 
+                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/BGW-0898.png" 
+            },
+            { 
+                no: "15-9734", 
+                type: "🏍️ Bike", 
+                q: 7, 
+                u: 0, 
+                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/15-9734.png" 
+            }
         ];
 
         let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v4'));
