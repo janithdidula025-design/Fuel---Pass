@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
     <!-- PWA Web Manifest -->
-    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v40","name":"Fuel Pass Ultra","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#0d0f17","theme_color":"#00f2fe","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v40","name":"Fuel Pass Ultra","short_name":"FuelPass","start_url":".","display":"standalone","background_color":"#0d0f17","theme_color":"#00f2fe","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
 
     <title>Fuel Pass Ultra</title>
 
@@ -162,7 +162,7 @@
         <div class="pass-card">
             <h3 class="v-number" id="dispV">NO VEHICLE</h3>
             <div class="qr-box">
-                <img id="mainQr" src="" style="display:none;">
+                <img id="mainQr" src="" style="display:none;" alt="QR Code">
                 <p id="noQrText" style="color:#000; font-size:0.8rem; font-weight:600; text-align:center;">QR එකක් නැත</p>
             </div>
         </div>
@@ -209,7 +209,7 @@
                 type: "🚗 Car", 
                 q: 25, 
                 u: 0, 
-                qr: "https://github.com/janithdidula025-design/Fuel---Pass/blob/72f34c2843714a4575eed5e3ffc60851ddab9f92/15-9734.png " 
+                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/72f34c2843714a4575eed5e3ffc60851ddab9f92/15-9734.png" 
             },
             { 
                 no: "BGW-0898", 
@@ -220,10 +220,10 @@
             }
         ];
 
-        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v4'));
+        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v5'));
         if (!vehicles || vehicles.length === 0) {
             vehicles = defaultVehicles;
-            localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
+            localStorage.setItem('fuel_pro_v5', JSON.stringify(vehicles));
         }
 
         let activeIdx = 0;
@@ -232,17 +232,12 @@
             if (confirm("අලුත් Update එකක් බලන්නද?")) window.location.reload(true);
         }
 
-        /* Full PWA Cache & Offline Service Worker */
+        /* Reliable Service Worker Registration */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'fuel-pass-v1';
+                    const CACHE_NAME = 'fuel-pass-v2';
                     self.addEventListener('install', e => {
-                        e.waitUntil(
-                            caches.open(CACHE_NAME).then(cache => {
-                                return cache.addAll(['./', 'index.html']);
-                            })
-                        );
                         self.skipWaiting();
                     });
                     self.addEventListener('activate', e => {
@@ -252,17 +247,23 @@
                         e.respondWith(
                             caches.match(e.request).then(response => {
                                 return response || fetch(e.request).then(fetchRes => {
-                                    return caches.open(CACHE_NAME).then(cache => {
-                                        cache.put(e.request, fetchRes.clone());
-                                        return fetchRes;
-                                    });
+                                    if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
+                                        return caches.open(CACHE_NAME).then(cache => {
+                                            cache.put(e.request, fetchRes.clone());
+                                            return fetchRes;
+                                        });
+                                    }
+                                    return fetchRes;
                                 });
-                            }).catch(() => caches.match('./'))
+                            }).catch(() => caches.match(e.request))
                         );
                     });
                 `;
-                const blob = new Blob([swCode], { type: 'text/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Register Error:', err));
+                try {
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(blobUrl).catch(() => {});
+                } catch(e) {}
             });
         }
 
@@ -331,7 +332,7 @@
         function hideForm() { document.getElementById('overlay').style.display = 'none'; }
 
         function saveData() {
-            const no = document.getElementById('inV').value.toUpperCase();
+            const no = document.getElementById('inV').value.toUpperCase().trim();
             const q = document.getElementById('inQ').value;
             const u = document.getElementById('inU').value || 0;
             const type = document.getElementById('inT').value;
@@ -341,7 +342,7 @@
 
             const save = (qrUrl) => {
                 vehicles.push({ no, q, u, type, qr: qrUrl });
-                localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
+                localStorage.setItem('fuel_pro_v5', JSON.stringify(vehicles));
                 activeIdx = vehicles.length - 1;
                 hideForm();
                 switchTab('pass', document.getElementById('tab1'));
@@ -360,7 +361,7 @@
             if (confirm("මෙය ඉවත් කිරීමට අවශ්‍යද?")) {
                 vehicles.splice(i, 1);
                 if (activeIdx >= vehicles.length) activeIdx = Math.max(0, vehicles.length - 1);
-                localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
+                localStorage.setItem('fuel_pro_v5', JSON.stringify(vehicles));
                 renderGarage();
             }
         }
