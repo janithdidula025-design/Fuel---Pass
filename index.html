@@ -12,7 +12,7 @@
 
     <link rel="manifest" href='data:application/json,{"id":"fuelpass-v30","name":"Fuel Pass Pro","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
 
-    <title>Fuel Pass </title>
+    <title>Fuel Pass Pro</title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;600&display=swap');
@@ -25,7 +25,7 @@
             padding-top: env(safe-area-inset-top);
         }
 
-        /* Header with Update Button */
+        /* Header */
         .header { 
             padding: 15px; 
             display: flex; 
@@ -49,7 +49,7 @@
             cursor: pointer;
         }
 
-        /* Rest of the UI */
+        /* UI Elements */
         .tabs { display: flex; gap: 10px; padding: 10px 15px; }
         .tab-btn { flex: 1; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-weight: 600; cursor: pointer; }
         .tab-btn.active { background: var(--gold); color: black; border: none; }
@@ -70,7 +70,8 @@
         .s-lbl { font-size: 0.55rem; opacity: 0.5; text-transform: uppercase; }
 
         #vList { width: 100%; overflow-y: auto; padding: 10px; }
-        .v-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .v-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; }
+        .v-card.selected { border-color: var(--gold); background: rgba(255, 215, 0, 0.08); }
 
         .btn-main { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 15px; font-weight: 900; width: 90%; font-family: 'Orbitron'; cursor: pointer; margin-bottom: 20px; }
 
@@ -123,15 +124,41 @@
     </div>
 
     <script>
-        // Check Update Function
+        // Default වාහන දත්ත (GitHub image link මෙතනට replace කරන්න)
+        const defaultVehicles = [
+            {
+                no: "CAD-1234",
+                type: "🚗 Car",
+                q: 20,
+                u: 5,
+                qr: "car_qr.png" // ඔබගේ GitHub Repo එකේ Car QR රූපයේ URL එක මෙහි යොදන්න
+            },
+            {
+                no: "BIKE-5678",
+                type: "🏍️ Bike",
+                q: 7,
+                u: 2,
+                qr: "bike_qr.png" // ඔබගේ GitHub Repo එකේ Bike QR රූපයේ URL එක මෙහි යොදන්න
+            }
+        ];
+
+        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v3'));
+
+        // Local Storage එකේ කලින් saved data නැත්නම් defaultData ගන්නවා
+        if (!vehicles || vehicles.length === 0) {
+            vehicles = defaultVehicles;
+            localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
+        }
+
+        let activeIdx = 0;
+
         function checkUpdate() {
             if (confirm("අලුත් Update එකක් තිබේදැයි පරීක්ෂා කර බලමුද?")) {
-                // Browser cache එක clear කරලා අලුතින් load කරනවා
                 window.location.reload(true);
             }
         }
 
-        // Service Worker for Installation
+        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
@@ -139,9 +166,6 @@
                 navigator.serviceWorker.register(URL.createObjectURL(blob));
             });
         }
-
-        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v3')) || [];
-        let activeIdx = 0;
 
         function switchTab(id, btn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -151,17 +175,35 @@
             id === 'home' ? renderHome() : renderManage();
         }
 
+        function selectVehicle(index) {
+            activeIdx = index;
+            renderHome();
+            switchTab('home', document.getElementById('btnH'));
+        }
+
         function renderHome() {
-            if(vehicles.length === 0) return;
-            const v = vehicles[activeIdx];
+            if (vehicles.length === 0) {
+                document.getElementById('dispV').innerText = "NO VEHICLE";
+                document.getElementById('dispQ').innerText = "0L";
+                document.getElementById('dispU').innerText = "0L";
+                document.getElementById('dispR').innerText = "0L";
+                document.getElementById('mainQr').style.display = 'none';
+                document.getElementById('noQrText').style.display = 'block';
+                return;
+            }
+            const v = vehicles[activeIdx] || vehicles[0];
             document.getElementById('dispV').innerText = v.no;
             document.getElementById('dispQ').innerText = v.q + "L";
             document.getElementById('dispU').innerText = v.u + "L";
             document.getElementById('dispR').innerText = (v.q - v.u) + "L";
-            if(v.qr) {
+            
+            if (v.qr) {
                 document.getElementById('mainQr').src = v.qr;
                 document.getElementById('mainQr').style.display = 'block';
                 document.getElementById('noQrText').style.display = 'none';
+            } else {
+                document.getElementById('mainQr').style.display = 'none';
+                document.getElementById('noQrText').style.display = 'block';
             }
         }
 
@@ -169,9 +211,10 @@
             const list = document.getElementById('vList');
             list.innerHTML = '';
             vehicles.forEach((v, i) => {
-                list.innerHTML += `<div class="v-card">
+                const isSelected = i === activeIdx ? 'selected' : '';
+                list.innerHTML += `<div class="v-card ${isSelected}" onclick="selectVehicle(${i})">
                     <div><b>${v.no}</b><br><small style="opacity:0.5">${v.type}</small></div>
-                    <button onclick="del(${i})" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-size:0.7rem;">DEL</button>
+                    <button onclick="event.stopPropagation(); del(${i})" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-size:0.7rem; cursor:pointer;">DEL</button>
                 </div>`;
             });
         }
@@ -182,23 +225,40 @@
         function saveData() {
             const no = document.getElementById('inV').value.toUpperCase();
             const q = document.getElementById('inQ').value;
-            const u = document.getElementById('inU').value;
+            const u = document.getElementById('inU').value || 0;
             const type = document.getElementById('inT').value;
             const f = document.getElementById('inF').files[0];
 
-            if(!no || !q || !f) return alert("කරුණාකර සියලු විස්තර පුරවන්න!");
+            if (!no || !q) return alert("කරුණාකර අනිවාර්ය විස්තර (වාහන අංකය සහ Quota) ඇතුළත් කරන්න!");
 
-            const reader = new FileReader();
-            reader.onload = e => {
-                vehicles.push({no, q, u, type, qr: e.target.result});
+            const createRecord = (qrUrl) => {
+                vehicles.push({ no, q, u, type, qr: qrUrl });
                 localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
-                hideForm(); renderHome(); switchTab('home', document.getElementById('btnH'));
+                activeIdx = vehicles.length - 1;
+                hideForm();
+                renderHome();
+                switchTab('home', document.getElementById('btnH'));
             };
-            reader.readAsDataURL(f);
+
+            if (f) {
+                const reader = new FileReader();
+                reader.onload = e => createRecord(e.target.result);
+                reader.readAsDataURL(f);
+            } else {
+                createRecord("");
+            }
         }
 
-        function del(i) { if(confirm("මෙම වාහනය මකමුද?")) { vehicles.splice(i,1); localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles)); renderManage(); } }
-        
+        function del(i) {
+            if (confirm("මෙම වාහනය මකමුද?")) {
+                vehicles.splice(i, 1);
+                if (activeIdx >= vehicles.length) activeIdx = Math.max(0, vehicles.length - 1);
+                localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
+                renderManage();
+                renderHome();
+            }
+        }
+
         window.onload = renderHome;
     </script>
 </body>
