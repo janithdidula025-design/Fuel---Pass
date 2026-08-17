@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
+    <!-- PWA Web Manifest -->
     <link rel="manifest" href='data:application/json,{"id":"fuelpass-v40","name":"Fuel Pass Ultra","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#0d0f17","theme_color":"#00f2fe","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
 
     <title>Fuel Pass Ultra</title>
@@ -65,12 +66,12 @@
         .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
 
         /* Main Container */
-        .content { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .content { flex: 1; display: none; flex-direction: column; padding: 15px 20px; overflow-y: auto; }
         .content.active { display: flex; }
 
         /* Quick Vehicle Selector Bar */
         .v-selector {
-            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; width: 100%;
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; width: 100%;
             scrollbar-width: none;
         }
         .v-chip {
@@ -82,20 +83,23 @@
         /* Pass Card Frame */
         .pass-card {
             background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-            border: 1px solid var(--card-border); border-radius: 24px; padding: 20px;
+            border: 1px solid var(--card-border); border-radius: 24px; padding: 15px 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px);
-            margin-bottom: 20px; position: relative;
+            margin-bottom: 15px; position: relative;
         }
         .pass-card::after {
             content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
             width: 60%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
 
-        .v-number { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; margin: 0 0 15px 0; }
+        .v-number { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px; margin: 0 0 10px 0; }
 
+        /* Larger QR Box Structure */
         .qr-box {
-            background: #fff; padding: 15px; border-radius: 16px; width: 230px; height: 230px;
+            background: #fff; padding: 12px; border-radius: 20px; 
+            width: 280px; height: 280px; 
+            max-width: 85vw; max-height: 85vw;
             display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px var(--accent-glow);
         }
         .qr-box img { width: 100%; height: 100%; object-fit: contain; }
@@ -199,21 +203,20 @@
     </div>
 
     <script>
-        // GitHub එකේ Direct Raw Links එකතු කර ඇති default vehicles
         const defaultVehicles = [
             { 
-                no: "BGW-0898", 
+                no: "15-9734", 
                 type: "🚗 Car", 
-                q: 20, 
+                q: 25, 
                 u: 0, 
-                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/BGW-0898.png" 
+                qr: "https://github.com/janithdidula025-design/Fuel---Pass/blob/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/15-9734.png " 
             },
             { 
-                no: "15-9734", 
+                no: "BGW-0898", 
                 type: "🏍️ Bike", 
-                q: 7, 
+                q: 8, 
                 u: 0, 
-                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/15-9734.png" 
+                qr: "https://raw.githubusercontent.com/janithdidula025-design/Fuel---Pass/0ca498f2f322ae734c8a08b0a8d567e5fb4ec1d5/BGW-0898.png" 
             }
         ];
 
@@ -229,12 +232,37 @@
             if (confirm("අලුත් Update එකක් බලන්නද?")) window.location.reload(true);
         }
 
-        // SW Register
+        /* Full PWA Cache & Offline Service Worker */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swCode = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
-                const blob = new Blob([swCode], {type: 'text/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(blob));
+                const swCode = `
+                    const CACHE_NAME = 'fuel-pass-v1';
+                    self.addEventListener('install', e => {
+                        e.waitUntil(
+                            caches.open(CACHE_NAME).then(cache => {
+                                return cache.addAll(['./', 'index.html']);
+                            })
+                        );
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', e => {
+                        e.waitUntil(self.clients.claim());
+                    });
+                    self.addEventListener('fetch', e => {
+                        e.respondWith(
+                            caches.match(e.request).then(response => {
+                                return response || fetch(e.request).then(fetchRes => {
+                                    return caches.open(CACHE_NAME).then(cache => {
+                                        cache.put(e.request, fetchRes.clone());
+                                        return fetchRes;
+                                    });
+                                });
+                            }).catch(() => caches.match('./'))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Register Error:', err));
             });
         }
 
