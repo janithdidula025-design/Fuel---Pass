@@ -4,161 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0d0f17">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
-    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v30","name":"Fuel Pass Pro","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#000000","theme_color":"#ffd700","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v40","name":"Fuel Pass Ultra","short_name":"FuelPass","start_url":"index.html","display":"standalone","background_color":"#0d0f17","theme_color":"#00f2fe","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
 
-    <title>Fuel Pass Pro</title>
+    <title>Fuel Pass Ultra</title>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;600&display=swap');
-        :root { --gold: #FFD700; --red: #ff4444; --glass: rgba(255, 255, 255, 0.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;600&display=swap');
+        
+        :root {
+            --accent: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.35);
+            --bg: #0d0f17;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --red: #ff4b4b;
+            --green: #00e676;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            margin: 0; padding: 0; background: #000; font-family: 'Poppins', sans-serif; color: white;
+            margin: 0; padding: 0; background: var(--bg); font-family: 'Inter', sans-serif; color: #fff;
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
             padding-top: env(safe-area-inset-top);
         }
 
-        /* Header */
+        /* Top Header */
         .header { 
-            padding: 15px; 
+            padding: 16px 20px; 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
-            background: rgba(255,255,255,0.03);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+            background: rgba(13, 15, 23, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
         }
-        .logo-area { display: flex; flex-direction: column; }
-        .logo-text { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--gold); letter-spacing: 1px; margin: 0; }
-        .version-text { font-size: 0.6rem; opacity: 0.4; }
+        .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; margin: 0; }
+        .version-tag { font-size: 0.65rem; background: rgba(0, 242, 254, 0.1); color: var(--accent); padding: 3px 8px; border-radius: 10px; margin-left: 6px; }
 
-        .btn-update {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            cursor: pointer;
+        .btn-sync {
+            background: transparent; color: #fff; border: 1px solid var(--card-border);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sync:active { transform: scale(0.95); background: var(--card-bg); }
+
+        /* Navigation Bar */
+        .nav-bar { display: flex; padding: 12px 20px 0 20px; gap: 10px; }
+        .nav-item {
+            flex: 1; padding: 10px; border: none; background: transparent; color: #888;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Main Container */
+        .content { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .content.active { display: flex; }
+
+        /* Quick Vehicle Selector Bar */
+        .v-selector {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; width: 100%;
+            scrollbar-width: none;
+        }
+        .v-chip {
+            background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 16px;
+            border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; opacity: 0.6;
+        }
+        .v-chip.active { opacity: 1; border-color: var(--accent); background: rgba(0, 242, 254, 0.15); color: #fff; }
+
+        /* Pass Card Frame */
+        .pass-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            border: 1px solid var(--card-border); border-radius: 24px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px);
+            margin-bottom: 20px; position: relative;
+        }
+        .pass-card::after {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
         }
 
-        /* UI Elements */
-        .tabs { display: flex; gap: 10px; padding: 10px 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--glass); color: #777; border-radius: 12px; font-weight: 600; cursor: pointer; }
-        .tab-btn.active { background: var(--gold); color: black; border: none; }
+        .v-number { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; margin: 0 0 15px 0; }
 
-        .view { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 15px; }
-        .view.active { display: flex; }
-
-        .qr-frame {
-            background: #fff; width: 82vw; height: 82vw; max-width: 350px; max-height: 350px;
-            border-radius: 20px; padding: 10px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(255,215,0,0.1);
+        .qr-box {
+            background: #fff; padding: 15px; border-radius: 16px; width: 230px; height: 230px;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px var(--accent-glow);
         }
-        #mainQr { width: 100%; height: 100%; object-fit: contain; }
+        .qr-box img { width: 100%; height: 100%; object-fit: contain; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-        .stat-box { background: rgba(255,255,255,0.03); padding: 15px 5px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .s-val { color: var(--gold); font-size: 1.1rem; font-weight: 700; display: block; }
-        .s-lbl { font-size: 0.55rem; opacity: 0.5; text-transform: uppercase; }
+        /* Quota Grid */
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+        .metric-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+            padding: 12px 8px; text-align: center;
+        }
+        .metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; display: block; }
+        .metric-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 4px; display: block; }
 
-        #vList { width: 100%; overflow-y: auto; padding: 10px; }
-        .v-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; }
-        .v-card.selected { border-color: var(--gold); background: rgba(255, 215, 0, 0.08); }
+        /* List UI for Garage */
+        .garage-item {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+            padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .garage-info h4 { margin: 0; font-size: 1rem; font-family: 'Space Grotesk', sans-serif; }
+        .garage-info p { margin: 4px 0 0 0; font-size: 0.75rem; color: #888; }
 
-        .btn-main { background: var(--gold); color: black; border: none; padding: 18px; border-radius: 15px; font-weight: 900; width: 90%; font-family: 'Orbitron'; cursor: pointer; margin-bottom: 20px; }
+        .btn-action {
+            background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 14px;
+            font-weight: 700; font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; width: 100%; cursor: pointer;
+            box-shadow: 0 8px 20px var(--accent-glow); margin-top: auto;
+        }
 
-        #overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; padding: 25px; flex-direction: column; justify-content: center; }
-        input, select { width: 100%; padding: 15px; border-radius: 12px; background: #111; border: 1px solid #333; color: white; margin-bottom: 15px; }
+        /* Modal Overlay */
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px); z-index: 1000; padding: 25px; flex-direction: column; justify-content: center;
+        }
+        input, select {
+            width: 100%; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border); color: white; margin-bottom: 12px; font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo-area">
-            <p class="logo-text">FUEL PASS PRO</p>
-            <span class="version-text">Version 3.0</span>
+        <div>
+            <span class="logo-text">FUEL PASS</span>
+            <span class="version-tag">ULTRA</span>
         </div>
-        <button class="btn-update" onclick="checkUpdate()">CHECK UPDATE</button>
+        <button class="btn-sync" onclick="checkUpdate()">UPDATE</button>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" id="btnH" onclick="switchTab('home', this)">MY CARD</button>
-        <button class="tab-btn" id="btnM" onclick="switchTab('manage', this)">GARAGE</button>
+    <div class="nav-bar">
+        <button class="nav-item active" id="tab1" onclick="switchTab('pass', this)">PASS CARD</button>
+        <button class="nav-item" id="tab2" onclick="switchTab('garage', this)">GARAGE</button>
     </div>
 
-    <div id="home" class="view active">
-        <h2 id="dispV" style="margin:0; font-family:'Orbitron'; color:#fff;">NO VEHICLE</h2>
-        <div class="qr-frame">
-            <img id="mainQr" src="" style="display:none;">
-            <p id="noQrText" style="color:#000; font-weight:bold; text-align:center;">UPLOAD QR TO START</p>
+    <!-- Pass View -->
+    <div id="pass" class="content active">
+        <!-- Quick Selector -->
+        <div class="v-selector" id="quickSelector"></div>
+
+        <!-- Main Card -->
+        <div class="pass-card">
+            <h3 class="v-number" id="dispV">NO VEHICLE</h3>
+            <div class="qr-box">
+                <img id="mainQr" src="" style="display:none;">
+                <p id="noQrText" style="color:#000; font-size:0.8rem; font-weight:600; text-align:center;">QR එකක් නැත</p>
+            </div>
         </div>
-        <div class="stats-grid">
-            <div class="stat-box"><span class="s-val" id="dispQ">0L</span><span class="s-lbl">Quota</span></div>
-            <div class="stat-box"><span class="s-val" id="dispU" style="color:var(--red)">0L</span><span class="s-lbl">Used</span></div>
-            <div class="stat-box"><span class="s-val" id="dispR" style="color:#00ff88">0L</span><span class="s-lbl">Balance</span></div>
+
+        <!-- Stats -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-val" id="dispQ" style="color:#fff;">0L</span>
+                <span class="metric-lbl">Quota</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-val" id="dispU" style="color:var(--red);">0L</span>
+                <span class="metric-lbl">Used</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-val" id="dispR" style="color:var(--green);">0L</span>
+                <span class="metric-lbl">Balance</span>
+            </div>
         </div>
     </div>
 
-    <div id="manage" class="view">
-        <div id="vList"></div>
-        <button class="btn-main" onclick="openForm()">+ ADD VEHICLE</button>
+    <!-- Garage View -->
+    <div id="garage" class="content">
+        <div id="vList" style="flex: 1;"></div>
+        <button class="btn-action" onclick="openForm()">+ ADD NEW VEHICLE</button>
     </div>
 
-    <div id="overlay">
-        <h2 style="color:var(--gold); text-align:center; font-family:'Orbitron';">SETTINGS</h2>
-        <select id="inT"><option>🚗 Car</option><option>🏍️ Bike</option><option>🛺 Tuk</option><option>🚐 Van</option></select>
-        <input type="text" id="inV" placeholder="Vehicle No">
-        <input type="number" id="inQ" placeholder="Quota (L)">
-        <input type="number" id="inU" placeholder="Used (L)">
+    <!-- Modal Form -->
+    <div class="modal" id="overlay">
+        <h3 style="font-family:'Space Grotesk'; color:var(--accent); margin-top:0;">ADD VEHICLE</h3>
+        <select id="inT"><option>🚗 Car</option><option>🏍️ Bike</option><option>🛺 Three Wheel</option><option>🚐 Van</option></select>
+        <input type="text" id="inV" placeholder="Vehicle No (e.g. CAB-1234)">
+        <input type="number" id="inQ" placeholder="Quota (Liters)">
+        <input type="number" id="inU" placeholder="Used (Liters)">
         <input type="file" id="inF" accept="image/*">
-        <button class="btn-main" onclick="saveData()">SAVE DATA</button>
-        <p onclick="hideForm()" style="text-align:center; color:var(--red); cursor:pointer; font-weight:bold; margin-top:20px;">CANCEL</p>
+        <button class="btn-action" onclick="saveData()">SAVE PASS</button>
+        <p onclick="hideForm()" style="text-align:center; color:var(--red); cursor:pointer; font-weight:600; margin-top:15px; font-size:0.85rem;">CANCEL</p>
     </div>
 
     <script>
-        // Default වාහන දත්ත (GitHub image link මෙතනට replace කරන්න)
+        // Car & Bike default array (GitHub Link replace කරන්න)
         const defaultVehicles = [
-            {
-                no: "CAD-1234",
-                type: "🚗 Car",
-                q: 20,
-                u: 5,
-                qr: "car_qr.png" // ඔබගේ GitHub Repo එකේ Car QR රූපයේ URL එක මෙහි යොදන්න
-            },
-            {
-                no: "BIKE-5678",
-                type: "🏍️ Bike",
-                q: 7,
-                u: 2,
-                qr: "bike_qr.png" // ඔබගේ GitHub Repo එකේ Bike QR රූපයේ URL එක මෙහි යොදන්න
-            }
+            { no: "CAD-1234", type: "🚗 Car", q: 20, u: 5, qr: "car_qr.png" },
+            { no: "BIKE-5678", type: "🏍️ Bike", q: 7, u: 2, qr: "bike_qr.png" }
         ];
 
-        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v3'));
-
-        // Local Storage එකේ කලින් saved data නැත්නම් defaultData ගන්නවා
+        let vehicles = JSON.parse(localStorage.getItem('fuel_pro_v4'));
         if (!vehicles || vehicles.length === 0) {
             vehicles = defaultVehicles;
-            localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
+            localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
         }
 
         let activeIdx = 0;
 
         function checkUpdate() {
-            if (confirm("අලුත් Update එකක් තිබේදැයි පරීක්ෂා කර බලමුද?")) {
-                window.location.reload(true);
-            }
+            if (confirm("අලුත් Update එකක් බලන්නද?")) window.location.reload(true);
         }
 
-        // PWA Service Worker Registration
+        // SW Register
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
@@ -168,25 +227,23 @@
         }
 
         function switchTab(id, btn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             btn.classList.add('active');
-            id === 'home' ? renderHome() : renderManage();
+            if (id === 'pass') renderHome();
+            if (id === 'garage') renderGarage();
         }
 
-        function selectVehicle(index) {
+        function setActiveVehicle(index) {
             activeIdx = index;
             renderHome();
-            switchTab('home', document.getElementById('btnH'));
         }
 
         function renderHome() {
+            renderQuickSelector();
             if (vehicles.length === 0) {
                 document.getElementById('dispV').innerText = "NO VEHICLE";
-                document.getElementById('dispQ').innerText = "0L";
-                document.getElementById('dispU').innerText = "0L";
-                document.getElementById('dispR').innerText = "0L";
                 document.getElementById('mainQr').style.display = 'none';
                 document.getElementById('noQrText').style.display = 'block';
                 return;
@@ -196,7 +253,7 @@
             document.getElementById('dispQ').innerText = v.q + "L";
             document.getElementById('dispU').innerText = v.u + "L";
             document.getElementById('dispR').innerText = (v.q - v.u) + "L";
-            
+
             if (v.qr) {
                 document.getElementById('mainQr').src = v.qr;
                 document.getElementById('mainQr').style.display = 'block';
@@ -207,14 +264,25 @@
             }
         }
 
-        function renderManage() {
+        function renderQuickSelector() {
+            const container = document.getElementById('quickSelector');
+            container.innerHTML = '';
+            vehicles.forEach((v, i) => {
+                const active = i === activeIdx ? 'active' : '';
+                container.innerHTML += `<div class="v-chip ${active}" onclick="setActiveVehicle(${i})">${v.type} ${v.no}</div>`;
+            });
+        }
+
+        function renderGarage() {
             const list = document.getElementById('vList');
             list.innerHTML = '';
             vehicles.forEach((v, i) => {
-                const isSelected = i === activeIdx ? 'selected' : '';
-                list.innerHTML += `<div class="v-card ${isSelected}" onclick="selectVehicle(${i})">
-                    <div><b>${v.no}</b><br><small style="opacity:0.5">${v.type}</small></div>
-                    <button onclick="event.stopPropagation(); del(${i})" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-size:0.7rem; cursor:pointer;">DEL</button>
+                list.innerHTML += `<div class="garage-item">
+                    <div class="garage-info">
+                        <h4>${v.no}</h4>
+                        <p>${v.type} • Quota: ${v.q}L</p>
+                    </div>
+                    <button onclick="del(${i})" style="background:rgba(255,75,75,0.15); color:var(--red); border:1px solid var(--red); padding:6px 12px; border-radius:10px; font-size:0.75rem; cursor:pointer;">REMOVE</button>
                 </div>`;
             });
         }
@@ -229,33 +297,31 @@
             const type = document.getElementById('inT').value;
             const f = document.getElementById('inF').files[0];
 
-            if (!no || !q) return alert("කරුණාකර අනිවාර්ය විස්තර (වාහන අංකය සහ Quota) ඇතුළත් කරන්න!");
+            if (!no || !q) return alert("කරුණාකර අනිවාර්ය විස්තර ඇතුළත් කරන්න!");
 
-            const createRecord = (qrUrl) => {
+            const save = (qrUrl) => {
                 vehicles.push({ no, q, u, type, qr: qrUrl });
-                localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
+                localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
                 activeIdx = vehicles.length - 1;
                 hideForm();
-                renderHome();
-                switchTab('home', document.getElementById('btnH'));
+                switchTab('pass', document.getElementById('tab1'));
             };
 
             if (f) {
                 const reader = new FileReader();
-                reader.onload = e => createRecord(e.target.result);
+                reader.onload = e => save(e.target.result);
                 reader.readAsDataURL(f);
             } else {
-                createRecord("");
+                save("");
             }
         }
 
         function del(i) {
-            if (confirm("මෙම වාහනය මකමුද?")) {
+            if (confirm("මෙය ඉවත් කිරීමට අවශ්‍යද?")) {
                 vehicles.splice(i, 1);
                 if (activeIdx >= vehicles.length) activeIdx = Math.max(0, vehicles.length - 1);
-                localStorage.setItem('fuel_pro_v3', JSON.stringify(vehicles));
-                renderManage();
-                renderHome();
+                localStorage.setItem('fuel_pro_v4', JSON.stringify(vehicles));
+                renderGarage();
             }
         }
 
