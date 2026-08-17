@@ -10,8 +10,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/483/483497.png">
 
-    <!-- PWA Web Manifest -->
-    <link rel="manifest" href='data:application/json,{"id":"fuelpass-v40","name":"Fuel Pass Ultra","short_name":"FuelPass","start_url":".","display":"standalone","background_color":"#0d0f17","theme_color":"#00f2fe","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/483/483497.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- External Manifest Link -->
+    <link rel="manifest" href="manifest.json">
 
     <title>Fuel Pass Ultra</title>
 
@@ -155,10 +155,8 @@
 
     <!-- Pass View -->
     <div id="pass" class="content active">
-        <!-- Quick Selector -->
         <div class="v-selector" id="quickSelector"></div>
 
-        <!-- Main Card -->
         <div class="pass-card">
             <h3 class="v-number" id="dispV">NO VEHICLE</h3>
             <div class="qr-box">
@@ -167,7 +165,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <span class="metric-val" id="dispQ" style="color:#fff;">0L</span>
@@ -229,41 +226,23 @@
         let activeIdx = 0;
 
         function checkUpdate() {
-            if (confirm("අලුත් Update එකක් බලන්නද?")) window.location.reload(true);
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.update();
+                    alert("App එක Refresh වෙනවා...");
+                    window.location.reload();
+                });
+            } else {
+                window.location.reload();
+            }
         }
 
-        /* Reliable Service Worker Registration */
+        /* Standard Service Worker Registration */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swCode = `
-                    const CACHE_NAME = 'fuel-pass-v2';
-                    self.addEventListener('install', e => {
-                        self.skipWaiting();
-                    });
-                    self.addEventListener('activate', e => {
-                        e.waitUntil(self.clients.claim());
-                    });
-                    self.addEventListener('fetch', e => {
-                        e.respondWith(
-                            caches.match(e.request).then(response => {
-                                return response || fetch(e.request).then(fetchRes => {
-                                    if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
-                                        return caches.open(CACHE_NAME).then(cache => {
-                                            cache.put(e.request, fetchRes.clone());
-                                            return fetchRes;
-                                        });
-                                    }
-                                    return fetchRes;
-                                });
-                            }).catch(() => caches.match(e.request))
-                        );
-                    });
-                `;
-                try {
-                    const blob = new Blob([swCode], { type: 'application/javascript' });
-                    const blobUrl = URL.createObjectURL(blob);
-                    navigator.serviceWorker.register(blobUrl).catch(() => {});
-                } catch(e) {}
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered!', reg))
+                    .catch(err => console.error('SW Error:', err));
             });
         }
 
